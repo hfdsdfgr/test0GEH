@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
+
 
 type Message = {
     role: 'user' | 'assistant';
@@ -13,7 +14,7 @@ export default function Home() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-
+    const chatRef = useRef<HTMLDivElement>(null);  // 创建 ref
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!input.trim()) return;
@@ -69,7 +70,7 @@ export default function Home() {
                     return newMessages;
                 });
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             setError('❌ 出错了，请稍后再试');
             // 移除临时 AI 消息
             setMessages((prev) => prev.slice(0, -1));
@@ -77,7 +78,11 @@ export default function Home() {
             setLoading(false);
         }
     };
-
+    useEffect(() => {
+        if (chatRef.current) {
+            chatRef.current.scrollTop = chatRef.current.scrollHeight;  // 滚动到底部
+        }
+    }, [messages, loading]);  // 依赖 messages 和 loading 更新时触发
     return (
         <div className="flex flex-col h-screen max-w-4xl mx-auto p-4 bg-gray-50">
             <h1 className="text-3xl font-bold mb-4 text-center text-blue-700">
@@ -89,7 +94,7 @@ export default function Home() {
             </p>
 
             {/* 聊天区 */}
-            <div className="flex-1 overflow-y-auto border rounded-xl p-4 bg-white shadow-sm mb-4">
+            <div ref={chatRef} className="flex-1 overflow-y-auto border rounded-xl p-4 bg-white shadow-sm mb-4">
                 {messages.length === 0 && (
                     <div className="text-center text-gray-400 mt-10">
                         例如：我想学 Python 入门
