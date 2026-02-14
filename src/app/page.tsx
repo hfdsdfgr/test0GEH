@@ -86,7 +86,7 @@ export default function Home() {
     };
 
     return (
-        <div className="flex flex-col h-screen max-w-4xl mx-auto p-4 bg-gray-50">
+        <div className="flex flex-col h-screen mx-auto bg-gray-50">
             <h1 className="text-3xl font-bold mb-4 text-center text-blue-700">
                 🌍 Global EduAgent Hub
             </h1>
@@ -96,7 +96,7 @@ export default function Home() {
             </p>
 
             {/* 聊天区 */}
-            <div className="flex-1 overflow-y-auto p-4 bg-transparent mb-4">
+            <div className="flex-1 overflow-y-auto bg-transparent">
                 {messages.length === 0 && (
                     <div className="text-center text-gray-400 mt-10">
                         例如：我想学 Python 入门
@@ -111,10 +111,10 @@ export default function Home() {
                         }`}
                     >
                         <div
-                            className={`max-w-[80%] p-4 rounded-2xl flex items-start justify-between ${
+                            className={`max-w-[80%] p-6 rounded-2xl flex items-start justify-between ${
                                 m.role === 'user'
                                     ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-200 text-gray-800 font-semibold border border-gray-300 shadow-md'  // AI 更明显
+                                    : 'bg-gray-100 text-gray-800'
                             }`}
                         >
                             <div className="flex-1">
