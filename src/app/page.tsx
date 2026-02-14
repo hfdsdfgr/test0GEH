@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 
 type Message = {
     role: 'user' | 'assistant';
@@ -19,14 +20,16 @@ export default function Home() {
 
         const userText = input;
 
-        // 1️⃣ 显示用户消息
+        // 显示用户消息
         setMessages((prev) => [...prev, { role: 'user', text: userText }]);
         setInput('');
         setLoading(true);
         setError(null);
 
+        // 添加临时 AI 消息占位
+        setMessages((prev) => [...prev, { role: 'assistant', text: '' }]);
+
         try {
-            // 2️⃣ 调用后端
             const res = await fetch('/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -44,15 +47,32 @@ export default function Home() {
                 throw new Error('请求失败');
             }
 
-            const data = await res.json();
+            const reader = res.body?.getReader();
+            if (!reader) {
+                throw new Error('响应流不可读');
+            }
 
-            // 3️⃣ 显示 AI 回复
-            setMessages((prev) => [
-                ...prev,
-                { role: 'assistant', text: data.content || '（AI 没有返回内容）' },
-            ]);
+            let aiText = '';
+
+            // 逐块读取流
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = new TextDecoder().decode(value);
+                aiText += chunk;
+
+                // 实时更新 AI 消息
+                setMessages((prev) => {
+                    const newMessages = [...prev];
+                    newMessages[newMessages.length - 1].text = aiText;
+                    return newMessages;
+                });
+            }
         } catch (err: any) {
             setError('❌ 出错了，请稍后再试');
+            // 移除临时 AI 消息
+            setMessages((prev) => prev.slice(0, -1));
         } finally {
             setLoading(false);
         }
@@ -65,7 +85,7 @@ export default function Home() {
             </h1>
 
             <p className="text-center text-gray-600 mb-6">
-                国内可用 · AI 学习助手
+                基于智谱开发 · AI 学习助手
             </p>
 
             {/* 聊天区 */}
@@ -91,7 +111,9 @@ export default function Home() {
                             }`}
                         >
                             <strong>{m.role === 'user' ? '你：' : 'AI：'}</strong>
-                            <div className="mt-2 whitespace-pre-wrap">{m.text}</div>
+                            <div className="mt-2 whitespace-pre-wrap">
+                                <ReactMarkdown>{m.text}</ReactMarkdown>
+                            </div>
                         </div>
                     </div>
                 ))}

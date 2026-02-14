@@ -40,11 +40,26 @@ export async function POST(req: Request) {
                 { role: 'system', content: systemPrompt },
                 { role: 'user', content: lastUserMessage },
             ],
+            stream: true,  // 启用流式
         });
 
-        return NextResponse.json({
-            role: 'assistant',
-            content: response.choices[0].message.content,
+        const stream = new ReadableStream({
+            async start(controller) {
+                for await (const chunk of response) {
+                    const content = chunk.choices[0]?.delta?.content || '';
+                    if (content) {
+                        controller.enqueue(new TextEncoder().encode(content));
+                    }
+                }
+                controller.close();
+            },
+        });
+
+        return new NextResponse(stream, {
+            headers: {
+                'Content-Type': 'text/plain',
+                'Transfer-Encoding': 'chunked',
+            },
         });
     } catch (err: unknown) {
         if (err instanceof Error) {
