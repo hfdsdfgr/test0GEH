@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-
 
 type Message = {
     role: 'user' | 'assistant';
@@ -14,7 +13,7 @@ export default function Home() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const chatRef = useRef<HTMLDivElement>(null);  // 创建 ref
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!input.trim()) return;
@@ -70,7 +69,7 @@ export default function Home() {
                     return newMessages;
                 });
             }
-        } catch (err: unknown) {
+        } catch (err: any) {
             setError('❌ 出错了，请稍后再试');
             // 移除临时 AI 消息
             setMessages((prev) => prev.slice(0, -1));
@@ -78,11 +77,14 @@ export default function Home() {
             setLoading(false);
         }
     };
-    useEffect(() => {
-        if (chatRef.current) {
-            chatRef.current.scrollTop = chatRef.current.scrollHeight;  // 滚动到底部
-        }
-    }, [messages, loading]);  // 依赖 messages 和 loading 更新时触发
+
+    const copyToClipboard = (text: string) => {
+        navigator.clipboard.writeText(text).then(
+            () => alert('已复制到剪贴板！'),
+            () => alert('复制失败，请手动复制。')
+        );
+    };
+
     return (
         <div className="flex flex-col h-screen max-w-4xl mx-auto p-4 bg-gray-50">
             <h1 className="text-3xl font-bold mb-4 text-center text-blue-700">
@@ -90,11 +92,11 @@ export default function Home() {
             </h1>
 
             <p className="text-center text-gray-600 mb-6">
-                基于智谱开发 · AI 学习助手
+                国内可用 · AI 学习助手
             </p>
 
             {/* 聊天区 */}
-            <div ref={chatRef} className="flex-1 overflow-y-auto border rounded-xl p-4 bg-white shadow-sm mb-4">
+            <div className="flex-1 overflow-y-auto p-4 bg-transparent mb-4">
                 {messages.length === 0 && (
                     <div className="text-center text-gray-400 mt-10">
                         例如：我想学 Python 入门
@@ -109,16 +111,24 @@ export default function Home() {
                         }`}
                     >
                         <div
-                            className={`max-w-[80%] p-4 rounded-2xl ${
+                            className={`max-w-[80%] p-4 rounded-2xl flex items-start justify-between ${
                                 m.role === 'user'
                                     ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 text-gray-800'
+                                    : 'bg-gray-200 text-gray-800 font-semibold border border-gray-300 shadow-md'  // AI 更明显
                             }`}
                         >
-                            <strong>{m.role === 'user' ? '你：' : 'AI：'}</strong>
-                            <div className="mt-2 whitespace-pre-wrap">
-                                <ReactMarkdown>{m.text}</ReactMarkdown>
+                            <div className="flex-1">
+                                <strong>{m.role === 'user' ? '你：' : 'AI：'}</strong>
+                                <div className="mt-2 whitespace-pre-wrap">
+                                    <ReactMarkdown>{m.text}</ReactMarkdown>
+                                </div>
                             </div>
+                            <button
+                                onClick={() => copyToClipboard(m.text)}
+                                className="ml-2 text-gray-500 hover:text-gray-700 text-sm"
+                            >
+                                复制
+                            </button>
                         </div>
                     </div>
                 ))}
