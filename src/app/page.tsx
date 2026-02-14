@@ -69,7 +69,7 @@ export default function Home() {
                     return newMessages;
                 });
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             setError('❌ 出错了，请稍后再试');
             // 移除临时 AI 消息
             setMessages((prev) => prev.slice(0, -1));
@@ -92,7 +92,7 @@ export default function Home() {
             </h1>
 
             <p className="text-center text-gray-600 mb-6">
-                国内可用 · AI 学习助手
+                基于智谱开发 · 你的AI学习助手
             </p>
 
             {/* 聊天区 */}
