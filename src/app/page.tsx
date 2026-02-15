@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { FiArrowUp } from 'react-icons/fi'; // 需要先安装: npm install react-icons
 
 type Message = {
     role: 'user' | 'assistant';
@@ -107,11 +108,11 @@ export default function Home() {
                     <div
                         key={idx}
                         className={`mb-4 flex ${
-                            m.role === 'user' ? 'justify-end' : 'justify-start'
+                            m.role === 'user' ? 'justify-end pr-10' : 'justify-center'
                         }`}
                     >
                         <div
-                            className={`max-w-[80%] p-6 rounded-2xl flex items-start justify-between ${
+                            className={`max-w-[80%] p-4 rounded-2xl flex items-start justify-between ${
                                 m.role === 'user'
                                     ? 'bg-blue-600 text-white'
                                     : 'bg-gray-100 text-gray-800'
@@ -144,22 +145,24 @@ export default function Home() {
                 )}
             </div>
 
-            {/* 输入区 */}
-            <form onSubmit={handleSubmit} className="flex gap-3">
-                <input
-                    value={input}
-                    onChange={(e) => setInput(e.target.value)}
-                    placeholder="例如：我想学 Python 入门"
-                    className="flex-1 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    disabled={loading}
-                />
-                <button
-                    type="submit"
-                    disabled={loading || !input.trim()}
-                    className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 disabled:opacity-50"
-                >
-                    发送
-                </button>
+            {/* 输入区 - Grok 风格：三分之二宽度 + 箭头嵌入 */}
+            <form onSubmit={handleSubmit} className="relative px-4 pb-6">
+                <div className="relative w-1/2 mx-auto">   {/* ← 控制宽度为网页 2/3 并居中 */}
+                    <input
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        placeholder="例如：我想学 Python 入门"
+                        className="w-full px-5 py-4 pr-16 text-gray-800 bg-white border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-0.5 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                        disabled={loading}
+                    />
+                    <button
+                        type="submit"
+                        disabled={loading || !input.trim()}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 bg-blue-600 text-white p-3 rounded-full hover:bg-blue-700 disabled:opacity-50 transition-colors duration-150 shadow-md"
+                    >
+                        <FiArrowUp size={20} strokeWidth={2.5} />
+                    </button>
+                </div>
             </form>
         </div>
     );
